@@ -15,21 +15,21 @@ const Page = () => {
 
   // Fetch food items from API
   const fetchFood = async () => {
-    const response = await fetch("http://localhost:3000/menu/food");
+    const response = await fetch("https://food-order-system-0fho.onrender.com/menu/food");
     const data = await response.json();
     setFood(data.map((item) => ({ ...item, price: Number(item.price) })));
   };
 
   // Fetch drink items from API
   const fetchDrinks = async () => {
-    const response = await fetch("http://localhost:3000/menu/drink");
+    const response = await fetch("https://food-order-system-0fho.onrender.com/menu/drink");
     const data = await response.json();
     setDrink(data.map((item) => ({ ...item, price: Number(item.price) })));
   };
 
   // Fetch addons from API
   const fetchAddons = async () => {
-    const response = await fetch("http://localhost:3000/menu/addon");
+    const response = await fetch("https://food-order-system-0fho.onrender.com/menu/addon");
     const data = await response.json();
     setAddons(data.map((addon) => ({ ...addon, price: Number(addon.price) })));
   };
@@ -71,7 +71,7 @@ const Page = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/order", {
+      const response = await fetch("https://food-order-system-0fho.onrender.com/order", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

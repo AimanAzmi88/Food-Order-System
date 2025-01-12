@@ -1,25 +1,25 @@
 import { useState, useEffect, useRef } from "react";
+import io from "socket.io-client"; // Import socket.io-client
 
 const KitchenOrders = () => {
   const [data, setData] = useState([]); // State to store the received data
-  const socketRef = useRef(null); // Using useRef to persist the WebSocket connection
+  const socketRef = useRef(null); // Using useRef to persist the socket connection
 
-  // Function to create WebSocket connection
-  const createWebSocketConnection = () => {
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      return socketRef.current; // If WebSocket is already open, return the existing connection
+  // Function to create socket.io connection
+  const createSocketConnection = () => {
+    if (socketRef.current) {
+      return socketRef.current; // If socket.io connection exists, return it
     }
 
-    socketRef.current = new WebSocket("ws://localhost:8080");
+    // Initialize socket.io connection
+    socketRef.current = io("https://food-order-system-0fho.onrender.com");
 
-    socketRef.current.addEventListener("open", () => {
-      console.log("WebSocket connection established");
+    socketRef.current.on("connect", () => {
+      console.log("Socket.io connection established");
     });
 
-    socketRef.current.addEventListener("message", (event) => {
+    socketRef.current.on("order", (receivedData) => {
       try {
-        const receivedData = JSON.parse(event.data); // Parse the received data
-
         // Add the new order to state if it doesn't exist already
         setData((prevData) => {
           const isDuplicate = prevData.some(
@@ -33,34 +33,34 @@ const KitchenOrders = () => {
           return prevData; // Return previous data if the order is a duplicate
         });
       } catch (error) {
-        console.error("Error parsing received data:", error);
+        console.error("Error processing received data:", error);
       }
     });
 
-    socketRef.current.addEventListener("error", (error) => {
-      console.error("WebSocket Error:", error);
+    socketRef.current.on("disconnect", () => {
+      console.log("Socket.io connection closed. Reconnecting...");
+      setTimeout(createSocketConnection, 3000); // Reconnect on disconnect
     });
 
-    socketRef.current.addEventListener("close", () => {
-      console.log("WebSocket closed. Reconnecting...");
-      setTimeout(createWebSocketConnection, 3000); // Reconnect on close
+    socketRef.current.on("error", (error) => {
+      console.error("Socket.io Error:", error);
     });
 
     return socketRef.current;
   };
 
-  // Setup WebSocket connection when the component mounts
+  // Setup socket.io connection when the component mounts
   useEffect(() => {
-    createWebSocketConnection();
+    createSocketConnection();
 
-    // Cleanup the WebSocket connection when the component unmounts
+    // Cleanup the socket.io connection when the component unmounts
     return () => {
       if (socketRef.current) {
-        socketRef.current.close();
-        console.log("WebSocket connection closed");
+        socketRef.current.disconnect();
+        console.log("Socket.io connection disconnected");
       }
     };
-  }, ); // Empty dependency array ensures it runs once when the component mounts
+  }, []); // Empty dependency array ensures it runs once when the component mounts
 
   return (
     <div className="container mx-auto p-4">

@@ -1,17 +1,19 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import { WebSocketServer } from 'ws';
+import http from 'http'; // Required for integrating with socket.io
+import socketIo from 'socket.io'; // Import socket.io
 import database from './database/connection.js';
 import addMenu from './controller/menuUpdate.js';
 import menuList from './controller/menuList.js';
 import deleteItem from './controller/menuDelete.js';
-import {saveOrder, getAllOrders} from './controller/order.js'; 
+import { saveOrder, getAllOrders } from './controller/order.js'; 
 
 const app = express();
-const PORT = 3000;
+const server = http.createServer(app); // Create the HTTP server for Express
+const io = socketIo(server); // Initialize socket.io with the HTTP server
 
-const wss = new WebSocketServer({ port: 8080 });
+const PORT = 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -23,25 +25,18 @@ database();
 let cart = [];
 let orders = [];
 
-// WebSocket broadcast function
-const broadcastOrder = (order) => {
-  wss.clients.forEach((client) => {
-    if (client.readyState === 1) { // Check if the connection is open
-      client.send(JSON.stringify(order)); // Send the order to the kitchen
-    }
-  });
-};
-
-// WebSocket connection event
-wss.on('connection', (ws) => {
+// Socket.io event handling and broadcasting
+io.on('connection', (socket) => {
   console.log('A kitchen client connected');
 
-  ws.on('message', (message) => {
-    console.log('Received message from kitchen:', message);
+  socket.on('disconnect', () => {
+    console.log('A kitchen client disconnected');
   });
 
-  ws.on('close', () => {
-    console.log('A kitchen client disconnected');
+  socket.on('order', (order) => {
+    console.log('Received order from kitchen:', order);
+    // Broadcast order to all clients (you can broadcast it to a specific room if necessary)
+    io.emit('newOrder', order);
   });
 });
 
@@ -62,8 +57,8 @@ app.post('/order', async (req, res) => {
     // Save the order using saveOrder function
     const savedOrder = await saveOrder(data);
 
-    // Broadcast the saved order
-    broadcastOrder(savedOrder);
+    // Broadcast the saved order via socket.io to all connected clients
+    io.emit('newOrder', savedOrder);
 
     console.log("Order saved and broadcasted:", savedOrder);
     res.json({ success: true, message: 'Order placed successfully', order: savedOrder });
@@ -73,8 +68,9 @@ app.post('/order', async (req, res) => {
   }
 });
 
-app.get('/orders', getAllOrders)
+app.get('/orders', getAllOrders);
+
 // Start server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
