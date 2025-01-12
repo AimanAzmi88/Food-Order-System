@@ -13,26 +13,26 @@ const Menu = () => {
 
   useEffect(() => {
     // Fetch food items
-    fetch("http://localhost:3000/menu/food")
+    fetch("https://food-order-system-0fho.onrender.com/menu/food")
       .then((response) => response.json())
       .then((data) => setFoodItem(data))
       .catch((error) => console.log("Error fetching food items:", error));
 
     // Fetch drink items
-    fetch("http://localhost:3000/menu/drink")
+    fetch("https://food-order-system-0fho.onrender.com/menu/drink")
       .then((response) => response.json())
       .then((data) => setDrinkItem(data))
       .catch((error) => console.log("Error fetching drink items:", error));
 
     // Fetch add-on items
-    fetch("http://localhost:3000/menu/addon")
+    fetch("https://food-order-system-0fho.onrender.com/menu/addon")
       .then((response) => response.json())
       .then((data) => setAddonItem(data))
       .catch((error) => console.log("Error fetching add-on items:", error));
   }, []);
 
   const handleDelete = (itemId, itemType) => {
-    const url = `http://localhost:3000/menu/${itemType}/${itemId}`;
+    const url = `https://food-order-system-0fho.onrender.com/menu/${itemType}/${itemId}`;
 
     fetch(url, {                      
       method: "DELETE",
