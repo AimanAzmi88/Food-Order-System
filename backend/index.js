@@ -11,7 +11,13 @@ import { saveOrder, getAllOrders } from './controller/order.js';
 
 const app = express();
 const server = http.createServer(app); // Create the HTTP server for Express
-const io = new Server(server); // Initialize socket.io with the HTTP server
+const io = new Server(server, {
+  cors: {
+    origin: "*",  // Allow this origin
+    methods: ["GET", "POST"],        // Allow these HTTP methods
+    allowedHeaders: ["Content-Type"], // Allow headers like Content-Type
+  },
+});
 
 const PORT = 3000;
 
