@@ -15,7 +15,7 @@ const io = new Server(server); // Initialize socket.io with the HTTP server
 
 const PORT = 3000;
 
-app.use(cors());
+app.use(cors({ origin: '*' }));
 app.use(bodyParser.json());
 
 // Initialize database connection
