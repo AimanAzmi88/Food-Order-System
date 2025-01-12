@@ -2,7 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import http from 'http'; // Required for integrating with socket.io
-import socketIo from 'socket.io'; // Import socket.io
+import { Server } from 'socket.io'; // Correct import for socket.io in ES modules
 import database from './database/connection.js';
 import addMenu from './controller/menuUpdate.js';
 import menuList from './controller/menuList.js';
@@ -11,7 +11,7 @@ import { saveOrder, getAllOrders } from './controller/order.js';
 
 const app = express();
 const server = http.createServer(app); // Create the HTTP server for Express
-const io = socketIo(server); // Initialize socket.io with the HTTP server
+const io = new Server(server); // Initialize socket.io with the HTTP server
 
 const PORT = 3000;
 
